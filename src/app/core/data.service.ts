@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { allBooks, allReaders } from 'app/data';
 import { Reader } from "app/models/reader";
@@ -11,6 +12,7 @@ import { BookTrackerError } from 'app/models/bookTrackerError';
 })
 export class DataService {
   // we are injecting the httpclient into our service constructor ! 
+  // the way of anguar to inject dependancy is a little bit easier and different than .NET ! 
 
   constructor(private http : HttpClient) { }
 
@@ -21,6 +23,7 @@ export class DataService {
   }
 
   getAllReaders(): Reader[] {
+    
     return allReaders;
   }
 
