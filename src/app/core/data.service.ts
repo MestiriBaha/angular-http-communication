@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { allBooks, allReaders } from 'app/data';
 import { Reader } from "app/models/reader";
@@ -9,8 +10,9 @@ import { BookTrackerError } from 'app/models/bookTrackerError';
   providedIn: 'root'
 })
 export class DataService {
+  // we are injecting the httpclient into our service constructor ! 
 
-  constructor() { }
+  constructor(private http : HttpClient) { }
 
   mostPopularBook: Book = allBooks[0];
 
