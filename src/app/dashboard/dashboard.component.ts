@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { Book } from "app/models/book";
 import { Reader } from "app/models/reader";
 import { DataService } from 'app/core/data.service';
+import { BookTrackerError } from 'app/models/bookTrackerError';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,8 +25,9 @@ export class DashboardComponent implements OnInit {
     this.dataService.getAllBooks() 
     .subscribe
     (
-      (data : Book[]) => this.allBooks = data , 
-      (err : any) => console.log(err) ,
+      // we have casted the data as the book type ! 
+      (data : Book[] | BookTrackerError) => this.allBooks = <Book[]> data , 
+      (err : BookTrackerError) => console.log(err.friendlyMessage) ,
       //the arrow function body ! 
       () => console.log("all done getting books")
 
@@ -35,9 +37,14 @@ export class DashboardComponent implements OnInit {
 
     this.title.setTitle(`Book Tracker`);
   }
+  
 
   deleteBook(bookID: number): void {
-    console.warn(`Delete book not yet implemented (bookID: ${bookID}).`);
+    this.dataService.DeleteBook(bookID).subscribe(
+      (data : void) => { let index : number = this.allBooks.findIndex(book => bookID===book.bookID) ; 
+      this.allBooks.splice(index,1)} ,
+      (err : any ) => console.log(err) 
+    )
   }
 
   deleteReader(readerID: number): void {

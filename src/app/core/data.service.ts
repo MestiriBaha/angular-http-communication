@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
-import { map , tap } from 'rxjs/operators'
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { from, Observable , throwError } from 'rxjs';
+import { map , tap , catchError } from 'rxjs/operators'
 
 import { allBooks, allReaders } from 'app/data';
 import { Reader } from "app/models/reader";
@@ -34,9 +34,21 @@ export class DataService {
     return allReaders.find(reader => reader.readerID === id);
   }
 
-  getAllBooks(): Observable<Book[]> {
+  getAllBooks(): Observable<Book[] | BookTrackerError> {
     console.log("getting all the books from the server ") ;
-    return this.http.get<Book[]>('/api/books') ;
+    return this.http.get<Book[]>('/api/books')
+    .pipe(
+      catchError(error => this.handlehttpError(error))
+    )
+  }
+  private handlehttpError(error : HttpErrorResponse ) : Observable<BookTrackerError>
+  {
+    let dataError = new BookTrackerError() ; 
+    dataError.errorNumber = 100 ; 
+    dataError.message= error.statusText ;
+    dataError.friendlyMessage = "an Error had occured when retrieving data"  ;
+    return (throwError(dataError))
+
   }
 
   getBookById(id: number): Observable<Book> {
@@ -58,4 +70,31 @@ export class DataService {
         tap(classicbook => console.log(classicbook))
       )
     }
+    //keep an eye on the exact writing , Headers is not headers !
+
+    AddBook(newbook : Book) : Observable<Book>
+    {
+      return this.http.post<Book>('/api/books', newbook , 
+      { headers : new HttpHeaders
+        ({
+        'content-Type' : 'application/json' 
+      })
+      } )
+    }
+
+    UpdateBook(updatebook : Book) : Observable<void>
+    {
+      return this.http.put<void>(`/api/books/${updatebook.bookID}`, updatebook , 
+      { headers : new HttpHeaders
+        ({
+        'content-Type' : 'application/json' 
+      })
+      } )
+    }
+
+    DeleteBook(bookID : number) : Observable<void>
+    {
+      return this.http.delete<void>(`/api/books/${bookID}`) 
+    } 
+    
 }
