@@ -78,25 +78,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AddReaderComponent": () => (/* binding */ AddReaderComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 4762);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 4762);
 /* harmony import */ var _raw_loader_add_reader_component_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !raw-loader!./add-reader.component.html */ 1699);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 7716);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 7716);
+/* harmony import */ var app_core_data_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! app/core/data.service */ 3943);
+
 
 
 
 let AddReaderComponent = class AddReaderComponent {
-    constructor() { }
+    constructor(dataservice) {
+        this.dataservice = dataservice;
+    }
     ngOnInit() { }
     saveReader(formValues) {
         let newReader = formValues;
         newReader.readerID = 0;
         console.log(newReader);
-        console.warn('Save new reader not yet implemented.');
+        this.dataservice.AddReader(newReader).subscribe((data) => console.log(data), (err) => console.log(err));
     }
 };
-AddReaderComponent.ctorParameters = () => [];
-AddReaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_1__.__decorate)([
-    (0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+AddReaderComponent.ctorParameters = () => [
+    { type: app_core_data_service__WEBPACK_IMPORTED_MODULE_1__.DataService }
+];
+AddReaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([
+    (0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
         selector: 'app-add-reader',
         template: _raw_loader_add_reader_component_html__WEBPACK_IMPORTED_MODULE_0__.default
     })
@@ -415,10 +421,11 @@ let DataService = class DataService {
         this.mostPopularBook = popularBook;
     }
     getAllReaders() {
-        return app_data__WEBPACK_IMPORTED_MODULE_0__.allReaders;
+        return this.http.get('api/readers')
+            .pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__.catchError)(error => this.handlehttpError(error)));
     }
     getReaderById(id) {
-        return app_data__WEBPACK_IMPORTED_MODULE_0__.allReaders.find(reader => reader.readerID === id);
+        return this.http.get(`api/readers/${id}`);
     }
     getAllBooks() {
         console.log("getting all the books from the server ");
@@ -463,6 +470,15 @@ let DataService = class DataService {
     }
     DeleteBook(bookID) {
         return this.http.delete(`/api/books/${bookID}`);
+    }
+    AddReader(newreader) {
+        return this.http.post('/api/readers', newreader);
+    }
+    UpdateReader(updatereader) {
+        return this.http.put(`api/readers/${updatereader.readerID}`, updatereader);
+    }
+    DeleteReader(ReaderID) {
+        return this.http.delete(`/api/readers/${ReaderID}`);
     }
 };
 DataService.ctorParameters = () => [
@@ -528,7 +544,7 @@ let DashboardComponent = class DashboardComponent {
         else {
             this.allBooks = resolveddata;
         }
-        this.allReaders = this.dataService.getAllReaders();
+        this.dataService.getAllReaders().subscribe((data) => this.allReaders = data, (error) => console.log(`${error.friendlyMessage}`));
         this.mostPopularBook = this.dataService.mostPopularBook;
         this.title.setTitle(`Book Tracker`);
     }
@@ -539,7 +555,10 @@ let DashboardComponent = class DashboardComponent {
         }, (err) => console.log(err));
     }
     deleteReader(readerID) {
-        console.warn(`Delete reader not yet implemented (readerID: ${readerID}).`);
+        this.dataService.DeleteReader(readerID).subscribe((data) => {
+            let index = this.allReaders.findIndex(index => index.readerID === readerID);
+            this.allReaders.splice(index, 1);
+        }, (error) => console.log(error));
     }
 };
 DashboardComponent.ctorParameters = () => [
@@ -672,11 +691,12 @@ let EditReaderComponent = class EditReaderComponent {
     }
     ngOnInit() {
         let readerID = parseInt(this.route.snapshot.params['id']);
-        this.selectedReader = this.dataService.getReaderById(readerID);
+        this.dataService.getReaderById(readerID).subscribe((data) => this.selectedReader = data, (error) => console.log(" a problem occured "), () => console.log("operation is is completed ! "));
         this.currentBadge = this.badgeService.getReaderBadge(this.selectedReader.totalMinutesRead);
     }
     saveChanges() {
-        console.warn('Save reader not yet implemented.');
+        this.dataService.UpdateReader(this.selectedReader)
+            .subscribe((data) => console.log(`${this.selectedReader.name} updated successfully `), (err) => console.log(err));
     }
 };
 EditReaderComponent.ctorParameters = () => [

@@ -42,7 +42,11 @@ export class DashboardComponent implements OnInit {
     }
     else 
     { this.allBooks = resolveddata}
-    this.allReaders = this.dataService.getAllReaders();
+     this.dataService.getAllReaders().subscribe(
+      (data : Reader[] | BookTrackerError) => this.allReaders = <Reader[]> data ,
+      (error : BookTrackerError ) => console.log(`${error.friendlyMessage}`) 
+      )
+     
     this.mostPopularBook = this.dataService.mostPopularBook;
 
     this.title.setTitle(`Book Tracker`);
@@ -58,7 +62,12 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteReader(readerID: number): void {
-    console.warn(`Delete reader not yet implemented (readerID: ${readerID}).`);
-  }
+this.dataService.DeleteReader(readerID).subscribe(
+  (data : void) => {let index : number = this.allReaders.findIndex(index => index.readerID===readerID) ;   
+      this.allReaders.splice(index,1)} ,
+      (error : any) => console.log(error))
+} 
+
+
 
 }

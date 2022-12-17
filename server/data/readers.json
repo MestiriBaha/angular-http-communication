@@ -13,8 +13,8 @@
     },
     {
         "readerID": 3,
-        "name": "Lanier",
-        "weeklyReadingGoal": 140,
-        "totalMinutesRead": 600
+        "name": "Baha",
+        "weeklyReadingGoal": "completing Pluralsight courses ",
+        "totalMinutesRead": "180"
     }
 ]

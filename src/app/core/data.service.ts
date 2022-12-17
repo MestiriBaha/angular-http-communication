@@ -24,14 +24,17 @@ export class DataService {
     this.mostPopularBook = popularBook;
   }
 
-  getAllReaders(): Reader[] {
+  getAllReaders(): Observable<Reader[] | BookTrackerError> {
   
     
-    return allReaders;
+    return this.http.get<Reader[]>('api/readers')
+    .pipe(
+      catchError(error => this.handlehttpError(error))
+    )
   }
 
-  getReaderById(id: number): Reader {
-    return allReaders.find(reader => reader.readerID === id);
+  getReaderById(id: number): Observable<Reader> {
+       return this.http.get<Reader>(`api/readers/${id}`)
   }
 
   getAllBooks(): Observable<Book[] | BookTrackerError> {
@@ -97,4 +100,15 @@ export class DataService {
       return this.http.delete<void>(`/api/books/${bookID}`) 
     } 
     
+    AddReader(newreader : Reader) : Observable<Reader>
+    {
+      return this.http.post<Reader>('/api/readers' , newreader)
+    }
+    UpdateReader(updatereader : Reader) : Observable<void>{
+      return this.http.put<void>(`api/readers/${updatereader.readerID}`, updatereader)
+    }
+    DeleteReader(ReaderID : number) : Observable<void>
+    {
+      return this.http.delete<void>(`/api/readers/${ReaderID}`) 
+    } 
 }
