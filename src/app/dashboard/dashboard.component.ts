@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 
 import { Book } from "app/models/book";
 import { Reader } from "app/models/reader";
@@ -19,10 +20,12 @@ export class DashboardComponent implements OnInit {
   mostPopularBook: Book;
 
   constructor(private dataService: DataService,
-              private title: Title) { }
+              private title: Title,
+              private router : ActivatedRoute) { }
   
   ngOnInit() {
-    this.dataService.getAllBooks() 
+    //it is a resolver , angular will take care of subscribing to the observable and delivering the data via the router 
+    /*this.dataService.getAllBooks() 
     .subscribe
     (
       // we have casted the data as the book type ! 
@@ -31,7 +34,14 @@ export class DashboardComponent implements OnInit {
       //the arrow function body ! 
       () => console.log("all done getting books")
 
-    )
+    )*/
+    let resolveddata : Book[] | BookTrackerError = this.router.snapshot.data['resolvedbooks']
+    if (resolveddata instanceof (BookTrackerError)) 
+    {
+      console.log(`Dashboard component error : ${resolveddata.friendlyMessage}`)
+    }
+    else 
+    { this.allBooks = resolveddata}
     this.allReaders = this.dataService.getAllReaders();
     this.mostPopularBook = this.dataService.mostPopularBook;
 
